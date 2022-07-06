@@ -25,16 +25,16 @@ class SarcasmDataset(tr.utils.data.Dataset):
         return(len(self.annotations))
 
     def __getitem__(self, index):
-            audio_sample_path = self._get_audio_sample_path(index)
-            #lable = self._get_audio_sample_lable(index)
-            signal, sr = torchaudio.load(audio_sample_path)
-            signal = signal.to(self.device)
-            signal = self.resample_if_nessesary(signal,sr)
-            #signal = self.mixdown_if_nessesary(signal)
-            signal = self._cut_if_necessary(signal)
-            signal = self._right_pad_if_necessary(signal)
-            #signal = self.DWT.go(signal)
-            return signal #, lable
+        audio_sample_path = self._get_audio_sample_path(index)
+        #lable = self._get_audio_sample_lable(index)
+        signal, sr = torchaudio.load(audio_sample_path)
+        signal = signal.to(self.device)
+        signal = self.resample_if_nessesary(signal,sr)
+        #signal = self.mixdown_if_nessesary(signal)
+        signal = self._cut_if_necessary(signal)
+        signal = self._right_pad_if_necessary(signal)
+        #signal = self.DWT.go(signal)
+        return signal #, lable
 
     
     def _right_pad_if_necessary(self, signal):
@@ -44,7 +44,6 @@ class SarcasmDataset(tr.utils.data.Dataset):
             last_dim_padding = (0, num_missing_samples)
             signal = tr.nn.functional.pad(signal, last_dim_padding)
         return signal
-    
     
     
     def _cut_if_necessary(self, signal):
@@ -80,41 +79,31 @@ class SarcasmDataset(tr.utils.data.Dataset):
         return self.MFCC(signal)
         
         
-
-    
 if __name__ == "__main__":
     
-            ANNOTATIONS_FILE = "annotations.csv"
-            AUDIO_DIR = "/"
-            SAMPLE_RATE = 44100
-            #NUM_SAMPLES = 44100
-            NUM_SAMPLES = 22050
+    ANNOTATIONS_FILE = "annotations.csv"
+    AUDIO_DIR = "/"
+    SAMPLE_RATE = 44100
+    #NUM_SAMPLES = 44100
+    NUM_SAMPLES = 22050
 
-            if tr.cuda.is_available():
-                device = "cuda"
-            else:
-                device = "cpu"
+    if tr.cuda.is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
 
-            print(f"Using {device}")
+    print(f"Using {device}")
 
-           
-            DWTinstance = DWT()        
+    
+    DWTinstance = DWT()        
 
-            sd = kickDatasetDWT(ANNOTATIONS_FILE,DWTinstance, SAMPLE_RATE, NUM_SAMPLES, device)
+    sd = kickDatasetDWT(ANNOTATIONS_FILE,DWTinstance, SAMPLE_RATE, NUM_SAMPLES, device)
 
-            print("There are " + str(len(sd)) + " samples in the dataset.")
-            test = sd[10]
-            print(np.shape(test))
+    print("There are " + str(len(sd)) + " samples in the dataset.")
+    test = sd[10]
+    print(np.shape(test))
 
-            plt.figure()
-            plt.imshow(test[:,0:200])
-            plt.show()
-
-
-
-            #signal, lable = sd[1]
-
-
-        
-
-
+    plt.figure()
+    plt.imshow(test[:,0:200])
+    plt.show()
+    #signal, lable = sd[1]

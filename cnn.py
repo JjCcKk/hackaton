@@ -1,12 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
-from torchvision import datasets, transforms
-from torchvision.utils import save_image
-import matplotlib.pyplot as plt
-import numpy as np
-import random
 
 class MelCNN(nn.Module):
     def __init__(self, imgChannels=1, featureDim=16*14*22042, zDim=64):
