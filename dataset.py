@@ -27,29 +27,28 @@ class SarcasmDataset(tr.utils.data.Dataset):
         return(len(self.annotations))
 
     def __getitem__(self, index):
-        audio_sample_path = self._get_audio_sample_path(index)
+        audio_sample_path = self.get_audio_sample_path(index)
         signal, sr = torchaudio.load(audio_sample_path)
         signal = signal.to(self.device)
         signal = self.take_left_channel(signal)
         signal = self.resample_if_nessesary(signal,sr)
-        #signal = self.mixdown_if_nessesary(signal)
-        #signal = self._cut_if_necessary(signal)
+        signal = self.cut_if_necessary(signal)
         signal = self.right_pad_if_necessary(signal)
-        signalList = self.split_and_stack(signal)
 
         #plt.figure()
         #plt.plot(signalList[0].numpy())
         #plt.plot(signalList[1].numpy())
         #plt.show()
+        
+        #signal = self.MEL_to_tensor(signal)
+        signal = self.MEL_on_device(signal)
 
-        signal = self.MEL_to_tensor(signalList)
+        #plt.figure()
+        #plt.imshow(signal[1,:,:])
+        #plt.show()
 
-        plt.figure()
-        plt.imshow(signal[1,:,:])
-        plt.show()
-
-        lable = self._get_audio_sample_lable(index)
-        return signal, lable
+        #lable = self._get_audio_sample_lable(index)
+        return signal
     
     
     
@@ -57,16 +56,17 @@ class SarcasmDataset(tr.utils.data.Dataset):
         return signal[0,:]
 
 
-    #def _cut_if_necessary(self, signal):
-    #    if signal.size(dim=0) > self.num_samples:
-    #        signal = signal[:, :self.num_samples]
-    #    return signal
+    def cut_if_necessary(self, signal):
+        if signal.size(dim=0) > self.num_samples:
+            signal = signal[0:(self.num_samples-1)]
+
+        return signal
 
     def right_pad_if_necessary(self, signal):
         length_signal = signal.size(dim=0)
         if length_signal < self.num_samples:
             num_missing_samples = self.num_samples - length_signal
-            last_dim_padding = (0, num_missing_samples)
+            last_dim_padding = (0, int(num_missing_samples))
             signal = tr.nn.functional.pad(signal, last_dim_padding)
         return signal
     
@@ -84,13 +84,12 @@ class SarcasmDataset(tr.utils.data.Dataset):
         return signal
     
 
-    def _get_audio_sample_path(self, index):
-
+    def get_audio_sample_path(self, index):
         path = self.annotations.values[index] #File Name in annotations-file in first column.
         path = path[0]
         return path
 
-    def _get_audio_sample_lable(self,index):
+    def get_audio_sample_lable(self,index):
         temp = self.annotations.values[index]
         return temp[1]
 
@@ -103,59 +102,55 @@ class SarcasmDataset(tr.utils.data.Dataset):
         out = []
         l = signal.size(dim=0)
         num_windows = int(np.floor(l / int(self.num_samples)))
-        print(f"Number of windows: {num_windows}")
+        #print(f"Number of windows: {num_windows}")
         if num_windows == 0:
             print("Signal has not been right-padded correctly.")
         clock = 0
         for i in range(num_windows):
             out.append(signal[clock:(clock+int(self.num_samples))])
             clock = clock + int(self.num_samples)
-        print(f"Length of list of tensors: {len(out)}")
+        #print(f"Length of list of tensors: {len(out)}")
         return out
 
 
-    def MEL_to_tensor(self, signalList): #Computes the MEL spectrogram for each signal in list and stacks them in a torch-tensor.
-        s = len(signalList)
-        out = []
-        for i in range(s):
-            x = signalList[i]
-            m = self.MEL(x)
-            out.append(m)
 
-        out = tr.stack(out, dim=0)
-        out.to(self.device)
-        return out
-
+    def MEL_on_device(self, signal):
+        x = self.MEL(signal)
+        x.to(self.device)
+        return x
         
 
     
 if __name__ == "__main__":
     
-            ANNOTATIONS_FILE = "annotations.csv"
-            AUDIO_DIR = "/"
-            SAMPLE_RATE = 44100
-            #NUM_SAMPLES = 44100
-            NUM_SAMPLES = 44100
+        ANNOTATIONS_FILE = "annotations.csv"
+        AUDIO_DIR = "/"
+        SAMPLE_RATE = 44100
+        #NUM_SAMPLES = 44100
+        NUM_SAMPLES = 44100*5
 
-            if tr.cuda.is_available():
-                device = "cuda"
-            else:
-                device = "cpu"
+        if tr.cuda.is_available():
+            device = "cuda"
+        else:
+            device = "cpu"
 
-            print(f"Using {device}")
+        print(f"Using {device}")
 
-            MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=128, n_mels=64, normalized=True)
+        MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
 
-            sd = SarcasmDataset(ANNOTATIONS_FILE, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
+        sd = SarcasmDataset(ANNOTATIONS_FILE, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
 
-            print("There are " + str(len(sd)) + " samples in the dataset.")
-            test = sd[40]
-            #print(np.shape(test))
-
-            plt.figure()
-            plt.imshow(test[1,0:200])
-            plt.show()
+        print("There are " + str(len(sd)) + " samples in the dataset.")
 
 
 
-            #signal, lable = sd[1]
+        test = sd[55]
+        print(test.size())
+
+        plt.figure()
+        plt.imshow(test[0:900])
+        plt.show()
+
+
+
+        #signal, lable = sd[1]
