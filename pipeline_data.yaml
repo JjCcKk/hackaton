@@ -1,0 +1,36 @@
+'on':
+  github:
+    branches:
+      only: main
+jobs:
+  CloneRepo:
+    resources:
+      instance-type: C5
+    outputs:
+      repo:
+        type: volume
+    uses: git-checkout@v1
+    with:
+      url: https://github.com/JjCcKk/hackaton.git
+
+  Data_Recuperator:
+    resources:
+      instance-type: P5000
+    needs:
+      - CloneRepo
+    uses: script@v1
+    with:
+      script: |-
+        apt-get install wget
+        apt-get install unzip
+        wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1i9ixalVcXskA5_BkNnbR60sqJqvGyi6E' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1i9ixalVcXskA5_BkNnbR60sqJqvGyi6E" -O mmsd_raw_data.zip && rm -rf /tmp/cookies.txt
+        unzip mmsd_raw_data.zip -d /outputs/videoinit/
+        rm mmsd_raw_data.zip
+      image: tensorflow/tensorflow:1.14.0-gpu-py3
+    inputs:
+      repo: CloneRepo.outputs.repo
+    outputs:
+      videoinit:
+        type: dataset
+        with:
+          ref: dsmgdoydul41mbn

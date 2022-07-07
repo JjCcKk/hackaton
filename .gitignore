@@ -2,3 +2,4 @@ venv/
 mmsd_raw_data/
 MUStARD/
 bert_repository/
+__pycache__
