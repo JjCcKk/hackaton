@@ -1,10 +1,10 @@
 import torch as tr
-from torch.utils.data import Dataset
 import pandas as pd
 import torchaudio
 import numpy as np
-from config import ANNOTATIONS_FILE, SAMPLE_RATE, NUM_SAMPLES
-import matplotlib.pyplot as plt
+import json
+from config import ANNOTATIONS_FILE_TRAIN, SAMPLE_RATE, NUM_SAMPLES
+
 
 class SarcasmDataset(tr.utils.data.Dataset):
 
@@ -80,13 +80,10 @@ class SarcasmDataset(tr.utils.data.Dataset):
     
 
     def get_audio_sample_path(self, index):
-        path = self.annotations.values[index] #File Name in annotations-file in first column.
-        path = path[0]
-        return path
+        return self.annotations["Path"][index]
 
-    def get_audio_sample_lable(self,index):
-        temp = self.annotations.values[index]
-        return temp[1]
+    def get_audio_sample_label(self,index):
+        return self.annotations["sarcasm"][index]
 
     #def voiceExtractor(self,signal):
 
@@ -120,14 +117,15 @@ if __name__ == "__main__":
     print(f"Using {device}")
 
     MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
-    sd = SarcasmDataset(ANNOTATIONS_FILE, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
-    print("There are " + str(len(sd)) + " samples in the dataset.")
+    sd = SarcasmDataset("data/" + ANNOTATIONS_FILE_TRAIN, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
 
-    test = sd[55]
-    print(test.size())
 
-    plt.figure()
-    plt.imshow(test[0:900])
-    plt.show()
+    dico_mem = {}
+    for i in range(len(sd)):
+        np.save("data/mel_spec/" + str(i) + ".npy", sd[i].numpy())
+        dico_mem[i] = int(sd.get_audio_sample_label(i))
 
-    #signal, lable = sd[1]
+    print(dico_mem)
+    with open('annotation.json', 'w') as f:
+        json.dump(dico_mem, f)
+    
