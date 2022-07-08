@@ -1,6 +1,5 @@
 import pandas as pd
 from config import ANNOTATIONS_FILE_TRAIN, ANNOTATIONS_FILE_TEST, DATA_INI, JSON_DATA
-from sklearn.model_selection import train_test_split
 
 if __name__=="__main__":
     data = pd.read_json(JSON_DATA).T
