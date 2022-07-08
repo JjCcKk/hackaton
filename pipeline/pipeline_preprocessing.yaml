@@ -41,6 +41,10 @@ jobs:
     inputs:
       repo: CloneRepo.outputs.repo
       repomustard: CloneMustard.outputs.repomustard
+      videoinit:
+        type: dataset
+        with:
+          ref: dsmgdoydul41mbn
     outputs:
       data:
         type: volume
