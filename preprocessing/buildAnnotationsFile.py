@@ -1,4 +1,5 @@
 import csv
+import pandas as pd
 import os
 #import os.path
 
@@ -7,7 +8,8 @@ with open('annotations.csv', 'a') as f:
     # create the csv writer
     writer = csv.writer(f,lineterminator='\n')
 
-
+    jfile = pd.read_json("sarcasm_data.json")
+    jfile = pd.DataFrame(jfile)
 
 
     rootdir = os.getcwd()
@@ -16,13 +18,17 @@ with open('annotations.csv', 'a') as f:
         for file in files:
             filepath = os.path.join(subdir, file)
             filename, file_extension = os.path.splitext(str(filepath))
-            #filepath = subdir + os.sep + file
-            print(filepath)
-            #print(file)
-            print(len(filepath))
-            #write name and path to new line
-            print(file_extension) ###gogogogoogogog if blah 
-            writer.writerow([filepath])
+            filename = filename.split("/")[-1]
+            key = filename.replace("_","")
+            print(key)
+            if key.split()[0].isnumeric(): 
+                #Read JSON file and extract sarcasm-lable
+                lable = jfile[int(key)]['sarcasm']
+                print(f"key:{key} lable:{lable}")
+                line = filepath + "," + filename + "," + str(lable)
+                writer.writerow([filepath])
+            else:
+                print("Non audio file skipped")
 
 
 
