@@ -19,7 +19,7 @@ class SarcasmDataset(tr.utils.data.Dataset):
         self.num_samples = num_samples
 
         #self.voiceExtractor = voiceExtractor
-        self.MEL = MEL
+        self.MEL = MEL.to(device)
 
     def __len__(self):
         return(len(self.annotations))
