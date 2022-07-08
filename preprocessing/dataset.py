@@ -126,7 +126,7 @@ if __name__ == "__main__":
 
     dico_mem = {}
     for i in range(len(sd)):
-        np.save("/outputs/mel_spec/" + str(i) + ".npy", sd[i].numpy())
+        np.save("/outputs/mel_spec/" + str(i) + ".npy", sd[i].cpu().numpy())
         dico_mem[i] = int(sd.get_audio_sample_label(i))
 
     print(dico_mem)

@@ -32,12 +32,9 @@ jobs:
     uses: script@v1
     with:
       script: |-
-        pip install pandas
-        pip install torch torchaudio
         python3 /inputs/repo/preprocessing/create_test_train.py
         python3 /inputs/repo/preprocessing/dataset.py
-        ls /outputs/data
-      image: tensorflow/tensorflow:1.14.0-gpu-py3
+      image: paperspace/gradient-base
     inputs:
       repo: CloneRepo.outputs.repo
       repomustard: CloneMustard.outputs.repomustard
