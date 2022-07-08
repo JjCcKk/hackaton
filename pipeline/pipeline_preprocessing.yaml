@@ -19,7 +19,11 @@ jobs:
       - CloneRepo
     uses: script@v1
     with:
-      script: echo coucou
+      script: -|
+        python3 /inputs/repo/preprocessing/create_test_train.py
       image: tensorflow/tensorflow:1.14.0-gpu-py3
     inputs:
       repo: CloneRepo.outputs.repo
+    outputs:
+      data:
+        type: volume
