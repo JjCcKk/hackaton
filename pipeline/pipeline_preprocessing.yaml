@@ -5,25 +5,39 @@
 jobs:
   CloneRepo:
     resources:
-      instance-type: C5
+      instance-type: C4
     outputs:
       repo:
         type: volume
     uses: git-checkout@v1
     with:
       url: https://github.com/JjCcKk/hackaton.git
+  CloneMustard:
+    resources:
+      instance-type: C4
+    needs:
+      - CloneRepo
+    outputs:
+      repomustard:
+        type: volume
+    uses: git-checkout@v1
+    with:
+      url: https://github.com/soujanyaporia/MUStARD.git
   Bert:
     resources:
       instance-type: P5000
     needs:
       - CloneRepo
+      - CloneMustard
     uses: script@v1
     with:
-      script: -|
+      script: |-
+        pip install pandas
         python3 /inputs/repo/preprocessing/create_test_train.py
       image: tensorflow/tensorflow:1.14.0-gpu-py3
     inputs:
       repo: CloneRepo.outputs.repo
+      repomustard: CloneMustard.outputs.repomustard
     outputs:
       data:
         type: volume
