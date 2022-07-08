@@ -1,6 +1,6 @@
 #Preprocessing configuration
 
-DATA_INI = "/inputs/repo/mmsd_raw_data/context_final/"
+DATA_INI = "/inputs/videoinit/mmsd_raw_data/context_final/"
 JSON_DATA = "/inputs/repomustard/data/sarcasm_data.json"
 ANNOTATIONS_FILE_TRAIN = "/outputs/data/train.csv"
 ANNOTATIONS_FILE_TEST = "/outputs/data/test.csv"

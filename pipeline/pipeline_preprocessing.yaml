@@ -23,7 +23,7 @@ jobs:
     uses: git-checkout@v1
     with:
       url: https://github.com/soujanyaporia/MUStARD.git
-  Bert:
+  Preprocessing:
     resources:
       instance-type: P5000
     needs:
@@ -33,6 +33,7 @@ jobs:
     with:
       script: |-
         pip install pandas
+        pip install torch torchaudio
         python3 /inputs/repo/preprocessing/create_test_train.py
         python3 /inputs/repo/preprocessing/dataset.py
         ls /outputs/data
