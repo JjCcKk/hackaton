@@ -126,6 +126,6 @@ if __name__ == "__main__":
         dico_mem[i] = int(sd.get_audio_sample_label(i))
 
     print(dico_mem)
-    with open('annotation.json', 'w') as f:
+    with open('data/annotation.json', 'w') as f:
         json.dump(dico_mem, f)
     
