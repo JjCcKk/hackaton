@@ -86,23 +86,6 @@ class SarcasmDataset(tr.utils.data.Dataset):
     def get_audio_sample_label(self,index):
         return self.annotations["sarcasm"][index]
 
-    #def voiceExtractor(self,signal):
-
-    def split_and_stack(self, signal): #Returns array of tensors with length num_samples.
-
-        out = []
-        l = signal.size(dim=0)
-        num_windows = int(np.floor(l / int(self.num_samples)))
-        #print(f"Number of windows: {num_windows}")
-        if num_windows == 0:
-            print("Signal has not been right-padded correctly.")
-        clock = 0
-        for i in range(num_windows):
-            out.append(signal[clock:(clock+int(self.num_samples))])
-            clock = clock + int(self.num_samples)
-        #print(f"Length of list of tensors: {len(out)}")
-        return out
-
     def MEL_on_device(self, signal):
         x = self.MEL(signal)
         x.to(self.device)
