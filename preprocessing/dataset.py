@@ -121,15 +121,14 @@ if __name__ == "__main__":
     sd = SarcasmDataset(ANNOTATIONS_FILE_TRAIN, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
 
 
-    if not os.path.exists("/outputs/mel_spec/"):
-        os.makedirs("/outputs/mel_spec/")
+    if not os.path.exists("/outputs/data/mel_spec/"):
+        os.makedirs("/outputs/data/mel_spec/")
 
     dico_mem = {}
     for i in range(len(sd)):
-        np.save("/outputs/mel_spec/" + str(i) + ".npy", sd[i].cpu().numpy())
+        np.save("/outputs/data/mel_spec/" + str(i) + ".npy", sd[i].cpu().numpy())
         dico_mem[i] = int(sd.get_audio_sample_label(i))
 
-    print(dico_mem)
-    with open('/outputs/annotation.json', 'w') as f:
+    with open('/outputs/data/annotation.json', 'w') as f:
         json.dump(dico_mem, f)
     

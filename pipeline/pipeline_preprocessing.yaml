@@ -34,7 +34,8 @@ jobs:
       script: |-
         python3 /inputs/repo/preprocessing/create_test_train.py
         python3 /inputs/repo/preprocessing/dataset.py
-      image: paperspace/gradient-base
+        ls /outputs/data/
+      image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
     inputs:
       repo: CloneRepo.outputs.repo
       repomustard: CloneMustard.outputs.repomustard
