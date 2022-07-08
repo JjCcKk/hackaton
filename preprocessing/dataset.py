@@ -1,13 +1,10 @@
-#from ntpath import join
-from pydoc import doc
 import torch as tr
-#import torch.cuda
 from torch.utils.data import Dataset
 import pandas as pd
 import torchaudio
 import numpy as np
+from config import ANNOTATIONS_FILE, SAMPLE_RATE, NUM_SAMPLES
 import matplotlib.pyplot as plt
-
 
 class SarcasmDataset(tr.utils.data.Dataset):
 
@@ -50,8 +47,6 @@ class SarcasmDataset(tr.utils.data.Dataset):
         #lable = self._get_audio_sample_lable(index)
         return signal
     
-    
-    
     def take_left_channel(self, signal):
         return signal[0,:]
 
@@ -93,9 +88,7 @@ class SarcasmDataset(tr.utils.data.Dataset):
         temp = self.annotations.values[index]
         return temp[1]
 
-
     #def voiceExtractor(self,signal):
-
 
     def split_and_stack(self, signal): #Returns array of tensors with length num_samples.
 
@@ -112,45 +105,29 @@ class SarcasmDataset(tr.utils.data.Dataset):
         #print(f"Length of list of tensors: {len(out)}")
         return out
 
-
-
     def MEL_on_device(self, signal):
         x = self.MEL(signal)
         x.to(self.device)
         return x
         
-
-    
 if __name__ == "__main__":
-    
-        ANNOTATIONS_FILE = "annotations.csv"
-        AUDIO_DIR = "/"
-        SAMPLE_RATE = 44100
-        #NUM_SAMPLES = 44100
-        NUM_SAMPLES = 44100*5
 
-        if tr.cuda.is_available():
-            device = "cuda"
-        else:
-            device = "cpu"
+    if tr.cuda.is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
 
-        print(f"Using {device}")
+    print(f"Using {device}")
 
-        MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
+    MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
+    sd = SarcasmDataset(ANNOTATIONS_FILE, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
+    print("There are " + str(len(sd)) + " samples in the dataset.")
 
-        sd = SarcasmDataset(ANNOTATIONS_FILE, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
+    test = sd[55]
+    print(test.size())
 
-        print("There are " + str(len(sd)) + " samples in the dataset.")
+    plt.figure()
+    plt.imshow(test[0:900])
+    plt.show()
 
-
-
-        test = sd[55]
-        print(test.size())
-
-        plt.figure()
-        plt.imshow(test[0:900])
-        plt.show()
-
-
-
-        #signal, lable = sd[1]
+    #signal, lable = sd[1]
