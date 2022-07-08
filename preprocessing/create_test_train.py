@@ -13,8 +13,8 @@ def segment_data(json_data, data_ini):
     data.index = range(data.shape[0])
 
     create_archi()
-    train = data.loc[:int(data.shape[0]*0.8)].to_csv("data/" + ANNOTATIONS_FILE_TRAIN, index=False)
-    test = data.loc[int(data.shape[0]*0.8):].to_csv("data/" + ANNOTATIONS_FILE_TEST, index=False)
+    train = data.loc[:int(data.shape[0]*0.8)].to_csv(ANNOTATIONS_FILE_TRAIN, index=False)
+    test = data.loc[int(data.shape[0]*0.8):].to_csv(ANNOTATIONS_FILE_TEST, index=False)
 
     return (train, test)
 
