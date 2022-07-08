@@ -2,6 +2,7 @@ import torch as tr
 import pandas as pd
 import torchaudio
 import numpy as np
+import os
 import json
 from config import ANNOTATIONS_FILE_TRAIN, SAMPLE_RATE, NUM_SAMPLES
 
@@ -117,15 +118,18 @@ if __name__ == "__main__":
     print(f"Using {device}")
 
     MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
-    sd = SarcasmDataset("data/" + ANNOTATIONS_FILE_TRAIN, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
+    sd = SarcasmDataset(ANNOTATIONS_FILE_TRAIN, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
 
+
+    if not os.path.exists("/outputs/mel_spec/"):
+        os.makedirs("/outputs/mel_spec/")
 
     dico_mem = {}
     for i in range(len(sd)):
-        np.save("data/mel_spec/" + str(i) + ".npy", sd[i].numpy())
+        np.save("/outputs/mel_spec/" + str(i) + ".npy", sd[i].numpy())
         dico_mem[i] = int(sd.get_audio_sample_label(i))
 
     print(dico_mem)
-    with open('data/annotation.json', 'w') as f:
+    with open('/outputs/annotation.json', 'w') as f:
         json.dump(dico_mem, f)
     

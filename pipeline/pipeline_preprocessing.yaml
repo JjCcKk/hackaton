@@ -34,6 +34,8 @@ jobs:
       script: |-
         pip install pandas
         python3 /inputs/repo/preprocessing/create_test_train.py
+        python3 /inputs/repo/preprocessing/dataset.py
+        ls /outputs/data
       image: tensorflow/tensorflow:1.14.0-gpu-py3
     inputs:
       repo: CloneRepo.outputs.repo
