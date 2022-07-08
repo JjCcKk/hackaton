@@ -1,0 +1,28 @@
+'on':
+  github:
+    branches:
+      only: main
+jobs:
+  CloneRepo:
+    resources:
+      instance-type: C5
+    outputs:
+      repo:
+        type: volume
+    uses: git-checkout@v1
+    with:
+      url: https://github.com/JjCcKk/hackaton.git
+  Bert:
+    resources:
+      instance-type: P5000
+    needs:
+      - CloneRepo
+    uses: script@v1
+    with:
+      script: |-
+        git clone https://github.com/soujanyaporia/MUStARD
+        pip install transformers, pandas
+        python3 /inputs/repo/model/model_nlp.py
+      image: pytorch/pytorch
+    inputs:
+      repo: CloneRepo.outputs.repo

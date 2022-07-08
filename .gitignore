@@ -3,3 +3,4 @@ mmsd_raw_data/
 MUStARD/
 bert_repository/
 __pycache__
+.ipynb_checkpoints
