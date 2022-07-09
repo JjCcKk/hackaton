@@ -35,7 +35,6 @@ jobs:
         python3 /inputs/repo/preprocessing/create_test_train.py
         python3 /inputs/repo/preprocessing/dataset.py
         cp -r /inputs/repo /outputs/repo/
-        ls /outputs/data/mel_spec_train/
       image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
     inputs:
       repo: CloneRepo.outputs.repo
@@ -57,7 +56,6 @@ jobs:
     uses: script@v1
     with:
       script: |-
-        ls /input/data/mel_spec_train/
         python3 /inputs/repo/repo/model/trainCNN.py
       image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
     inputs:

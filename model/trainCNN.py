@@ -20,7 +20,7 @@ def create_data_loader(train_dir, annotation_file, batch_size):
 
     for i in os.listdir(train_dir):
         vec = np.load(train_dir + i)
-        label = data[i]
+        label = data[i.replace(".npy", "")]
 
         train_df.append(vec)
         label_df.append(label)
@@ -31,18 +31,15 @@ def create_data_loader(train_dir, annotation_file, batch_size):
     train_dataloader = DataLoader(train_df, batch_size=batch_size)
     label_dataloader = DataLoader(label_df, batch_size=batch_size)
 
-    print(train_df)
-
     return train_dataloader, label_dataloader
 
 
 def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_fn, optimiser, device, test_data_loader, test_label_data_loader):
-
-
-
     for input, lable in zip(train_data_loader, train_label_data_loader):
         input = input.to(device)
         lable = lable.float().to(device)
+
+        print(lable)
 
         #print("Shape of sample: " + str(input.size()))
         input = input.float()
@@ -62,7 +59,7 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
         loss.backward()
         optimiser.step()
 
-    #print(f"loss: {loss.item()}")
+    print(f"loss: {loss.item()}")
     #Calculate loss on test set here!
     testLoss = []
     
@@ -76,7 +73,7 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
         prediction = tr.squeeze(prediction)
         loss = loss_fn(prediction,lable)
         testLoss.append(loss.item())
-    #print(f"test_loss: {np.mean(testLoss)}")
+    print(f"test_loss: {np.mean(testLoss)}")
 
 
 def train(model, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, epochs, test_data_loader, test_label_loader):
