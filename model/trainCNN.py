@@ -67,6 +67,7 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
     for i,lable in zip(test_data_loader, test_label_data_loader):
 
         if len(lable)==BATCH_SIZE:
+
             i = i.to(device)
             lable = lable.bool().int().float().to(device)
             i = i.float()
@@ -86,6 +87,7 @@ def train(model, train_data_loader, label_train_data_loader, loss_fn, optimiser,
     print("Finished training")
 
 if __name__ == "__main__":
+    print("COUCOUC")
     if tr.cuda.is_available():
         device = "cuda"
     else:
