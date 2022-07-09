@@ -9,7 +9,7 @@ def create_archi():
 
 def segment_data(json_data, data_ini):
     data = pd.read_json(JSON_DATA).T
-    data["Path"] = [DATA_INI + str(i)[0] + "_" + str(i)[1:] + "_c.mp4" for i in data.index]
+    data["Path"] = [DATA_INI + str(i)[0] + "_" + str(i)[1:] + ".mp4" for i in data.index]
     data.index = range(data.shape[0])
 
     create_archi()
