@@ -102,7 +102,7 @@ def create_spec(train_dir, annotation_file, mem_train):
 
     dico_mem = {}
     for i in range(len(sd)):
-        np.save(train_dir + str(i) + ".npy", sd[i].cpu().numpy())
+        np.save(str(i), sd[i].cpu().numpy())
         dico_mem[train_dir + str(i) + ".npy"] = int(sd.get_audio_sample_label(i))
 
     with open(annotation_file, 'w') as f:

@@ -20,7 +20,7 @@ def create_data_loader(train_dir, annotation_file, batch_size):
 
     for i in os.listdir(train_dir):
         vec = np.load(train_dir + i)
-        label = data[i.replace(".npy", "")]
+        label = data[i]
 
         train_df.append(vec)
         label_df.append(label)
