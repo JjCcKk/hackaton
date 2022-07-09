@@ -31,15 +31,18 @@ def create_data_loader(train_dir, annotation_file, batch_size):
     train_dataloader = DataLoader(train_df, batch_size=batch_size)
     label_dataloader = DataLoader(label_df, batch_size=batch_size)
 
+    print(train_df)
+
     return train_dataloader, label_dataloader
 
 
 def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_fn, optimiser, device, test_data_loader, test_label_data_loader):
+
+
+
     for input, lable in zip(train_data_loader, train_label_data_loader):
         input = input.to(device)
         lable = lable.float().to(device)
-
-        print(lable)
 
         #print("Shape of sample: " + str(input.size()))
         input = input.float()
