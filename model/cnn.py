@@ -20,12 +20,12 @@ class MelCNN(nn.Module):
         self.reduce_channels_by = reduce_channels_by
         if pool_before_attention:
             height = 5
-            self.width_before_mlp = int(332*3*height)
+            self.width_before_mlp = int(332*int((channel_factor**2)*reduce_channels_by)*height)
             self.FC1 = nn.Linear(self.width_before_mlp, int(size_hidden_layer*self.width_before_mlp))
             self.FC2 = nn.Linear(int(size_hidden_layer*self.width_before_mlp),1)
         else:
             height = 14
-            self.width_before_mlp = int(667*3*height)
+            self.width_before_mlp = int(667*int((channel_factor**2)*reduce_channels_by)*height)
             self.FC1 = nn.Linear(self.width_before_mlp, int(size_hidden_layer*self.width_before_mlp))
             self.FC2 = nn.Linear(int(size_hidden_layer*self.width_before_mlp),1)
             
@@ -40,7 +40,7 @@ class MelCNN(nn.Module):
         self.Conv3 = nn.Conv2d(channel_factor**2, int((channel_factor**2)*reduce_channels_by), (1,1))
 
         self.Conv4 = nn.Conv2d(int((channel_factor**2)*reduce_channels_by), int((channel_factor**2)*reduce_channels_by*9), (5,5), padding=(2,2))
-        self.Conv5 = nn.Conv2d(int((channel_factor**2)*reduce_channels_by*9), 3, (5,5),padding=(2,2))
+        self.Conv5 = nn.Conv2d(int((channel_factor**2)*reduce_channels_by*9), int((channel_factor**2)*reduce_channels_by), (5,5),padding=(2,2))
 
         self.pool = nn.MaxPool2d(5, stride=2)
 
