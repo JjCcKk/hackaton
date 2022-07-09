@@ -122,4 +122,4 @@ if __name__ == "__main__":
 
     # train model
     train(MelCNNi, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, EPOCHS, test_data_loader, label_test_data_loader)
-    tr.save(MelCNNi, 'model.pth')
+    tr.save(MelCNNi.state_dict(), 'model.pth')

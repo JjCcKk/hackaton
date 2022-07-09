@@ -1,17 +1,20 @@
 import gradio as gr
 import requests
 import os
+import ast
 
 HF_TOKEN = os.getenv('HF_TOKEN')
 hf_writer = gr.HuggingFaceDatasetSaver(HF_TOKEN, "Rick-bot-flags")
 
 def greet(audio:tuple) -> str:
     json_original = {
-        "Enregistrement": str(list(audio[0]))
+        "Enregistrement": audio[1].tolist()
     }
 
-    res_preprocess = requests.post("https://j7zmal.deta.dev/preprocess", json=json_original)
-    return res_preprocess.text
+    res_preprocess = requests.post("http://127.0.0.1:8000/preprocess", json=json_original)
+    print(ast.literal_eval(res_preprocess.text)["Spectrogram"])
+
+    return "Hello"
 
 
 audio = gr.inputs.Audio(source="microphone", label='What do you want to say ?')
