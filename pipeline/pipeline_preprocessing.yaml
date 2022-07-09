@@ -34,6 +34,7 @@ jobs:
       script: |-
         python3 /inputs/repo/preprocessing/create_test_train.py
         python3 /inputs/repo/preprocessing/dataset.py
+        cp -r /inputs/repo /outputs/data/
         ls /outputs/data/
       image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
     inputs:
@@ -45,4 +46,22 @@ jobs:
           ref: dsmgdoydul41mbn
     outputs:
       data:
+        type: volume
+  Model:
+    resources:
+      instance-type: P5000
+    needs:
+      - Preprocessing
+    uses: script@v1
+    with:
+      script: cat /inputs/data/train.csv
+      image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
+    inputs:
+      data: Preprocessing.outputs.data
+      videoinit:
+        type: dataset
+        with:
+          ref: dsmgdoydul41mbn
+    outputs:
+      res:
         type: volume

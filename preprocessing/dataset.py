@@ -4,7 +4,7 @@ import torchaudio
 import numpy as np
 import os
 import json
-from config import ANNOTATIONS_FILE_TRAIN, SAMPLE_RATE, NUM_SAMPLES
+from config import ANNOTATIONS_FILE_TRAIN, SAMPLE_RATE, NUM_SAMPLES, ANNOTATIONS_FILE_TEST
 
 
 class SarcasmDataset(tr.utils.data.Dataset):
@@ -90,7 +90,26 @@ class SarcasmDataset(tr.utils.data.Dataset):
         x = self.MEL(signal)
         x.to(self.device)
         return x
-        
+
+
+def create_spec(train_dir, annotation_file, mem_train):
+
+    MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
+    sd = SarcasmDataset(mem_train, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
+
+    if not os.path.exists(train_dir):
+        os.makedirs(train_dir)
+
+    dico_mem = {}
+    for i in range(len(sd)):
+        np.save(train_dir + str(i) + ".npy", sd[i].cpu().numpy())
+        dico_mem[train_dir + str(i) + ".npy"] = int(sd.get_audio_sample_label(i))
+
+    with open(annotation_file, 'w') as f:
+        json.dump(dico_mem, f)
+    
+
+
 if __name__ == "__main__":
 
     if tr.cuda.is_available():
@@ -100,18 +119,5 @@ if __name__ == "__main__":
 
     print(f"Using {device}")
 
-    MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
-    sd = SarcasmDataset(ANNOTATIONS_FILE_TRAIN, MELi, SAMPLE_RATE, NUM_SAMPLES, device)
-
-
-    if not os.path.exists("/outputs/data/mel_spec/"):
-        os.makedirs("/outputs/data/mel_spec/")
-
-    dico_mem = {}
-    for i in range(len(sd)):
-        np.save("/outputs/data/mel_spec/" + str(i) + ".npy", sd[i].cpu().numpy())
-        dico_mem[i] = int(sd.get_audio_sample_label(i))
-
-    with open('/outputs/data/annotation.json', 'w') as f:
-        json.dump(dico_mem, f)
-    
+    create_spec("/outputs/data/mel_spec_train/", '/outputs/data/annotation_train.json', ANNOTATIONS_FILE_TRAIN)
+    create_spec("/outputs/data/mel_spec_test/", '/outputs/data/annotation_test.json', ANNOTATIONS_FILE_TEST)

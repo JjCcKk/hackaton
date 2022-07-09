@@ -1,25 +1,21 @@
 #from ntpath import join
 import torch as tr
 #import torch.cuda
-from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
-import pandas as pd
 import torchaudio
 import numpy as np
-import matplotlib.pyplot as plt
 import torch.nn as nn
-
 from dataset import SarcasmDataset
 from cnn import MelCNN
 from cnn import SelfAttention
-
+from configtrain import TRAIN_FILE, TEST_FILE
 
 BATCH_SIZE = 4
 EPOCHS = 50
 LEARNING_RATE = 0.00002
 
-TRAIN_FILE = "train.csv"
-TEST_FILE = "test.csv"
+TRAIN_FILE = TRAIN_FILE
+TEST_FILE = TEST_FILE
 SAMPLE_RATE = 44100
 NUM_SAMPLES = 44100*5 #The Model works with samples of 5s length.
 
