@@ -1,5 +1,4 @@
-from model.trainCNN import TEST_FILE, TRAIN_FILE
-
-
-TRAIN_FILE = "train.csv"
-TEST_FILE = "test.csv"
+TRAIN_FILE = "/inputs/data/mel_spec_train/"
+TRAIN_ANNOTATION = "/inputs/data/annotation_train.json"
+TEST_FILE = "/inputs/data/mel_spec_train/"
+TEST_ANNOTATION = "/inputs/data/annotation_test.json"

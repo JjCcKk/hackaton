@@ -1,34 +1,45 @@
-#from ntpath import join
 import torch as tr
-#import torch.cuda
 from torch.utils.data import DataLoader
-import torchaudio
 import numpy as np
 import torch.nn as nn
-from dataset import SarcasmDataset
 from cnn import MelCNN
 from cnn import SelfAttention
-from configtrain import TRAIN_FILE, TEST_FILE
+from configtrain import TRAIN_FILE, TEST_FILE, TRAIN_ANNOTATION, TEST_ANNOTATION
+import os
+import json
 
 BATCH_SIZE = 2
 EPOCHS = 50
 LEARNING_RATE = 0.00002
 
-TRAIN_FILE = TRAIN_FILE
-TEST_FILE = TEST_FILE
-SAMPLE_RATE = 44100
-NUM_SAMPLES = 44100*5 #The Model works with samples of 5s length.
+
+def create_data_loader(train_dir, annotation_file, batch_size):
+    train_df, label_df = [],[]
+    with open(annotation_file, 'r') as f:
+        data = json.load(f)
+
+    for i in os.listdir(train_dir):
+        vec = np.load(train_dir + i)
+        label = data[i.replace(".npy", "")]
+
+        train_df.append(vec)
+        label_df.append(label)
+
+    label_df = np.array(label_df)
+    train_df = np.array(train_df)
+
+    train_dataloader = DataLoader(train_df, batch_size=batch_size)
+    label_dataloader = DataLoader(label_df, batch_size=batch_size)
+
+    return train_dataloader, label_dataloader
 
 
-def create_data_loader(train_data, batch_size):
-    train_dataloader = DataLoader(train_data, batch_size=batch_size)
-    return train_dataloader
-
-
-def train_single_epoch(model, train_data_loader, loss_fn, optimiser, device, test_data_loader):
-    for input, lable in train_data_loader:
+def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_fn, optimiser, device, test_data_loader, test_label_data_loader):
+    for input, lable in zip(train_data_loader, train_label_data_loader):
         input = input.to(device)
-        lable = lable.bool().int().float().to(device)
+        lable = lable.float().to(device)
+
+        print(lable)
 
         #print("Shape of sample: " + str(input.size()))
         input = input.float()
@@ -53,7 +64,7 @@ def train_single_epoch(model, train_data_loader, loss_fn, optimiser, device, tes
     testLoss = []
     
     #Calculate loss on test-set
-    for i,lable in test_data_loader:
+    for i,lable in zip(test_data_loader, test_label_data_loader):
         i = i.to(device)
         lable = lable.bool().int().float().to(device)
         i = i.float()
@@ -64,10 +75,11 @@ def train_single_epoch(model, train_data_loader, loss_fn, optimiser, device, tes
         testLoss.append(loss.item())
     print(f"test_loss: {np.mean(testLoss)}")
 
-def train(model, train_data_loader, loss_fn, optimiser, device, epochs, test_data_loader):
+
+def train(model, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, epochs, test_data_loader, test_label_loader):
     for i in range(epochs):
         print(f"Epoch {i+1}")
-        train_single_epoch(model, train_data_loader, loss_fn, optimiser, device, test_data_loader)
+        train_single_epoch(model, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, test_data_loader, test_label_loader)
         print("---------------------------")
     print("Finished training")
 
@@ -77,26 +89,11 @@ if __name__ == "__main__":
     else:
         device = "cpu"
     print(f"Using {device}")
-
-    MELi = torchaudio.transforms.MelSpectrogram(SAMPLE_RATE, n_fft=330, n_mels=32, normalized=True)
-
-    usdTrain = SarcasmDataset(TRAIN_FILE,
-                            MELi, #Callable Object that was instantiated before.
-                            SAMPLE_RATE,
-                            NUM_SAMPLES,
-                            device)
-                            
-    usdTest = SarcasmDataset(TEST_FILE,
-                            MELi, #Callable Object that was instantiated before.
-                            SAMPLE_RATE,
-                            NUM_SAMPLES,
-                            device)
-    print(len(usdTrain))
-    print(len(usdTest))
     
-    train_data_loader = create_data_loader(usdTrain, BATCH_SIZE)
-    test_data_loader = create_data_loader(usdTest, BATCH_SIZE)
+    train_data_loader, label_train_data_loader = create_data_loader(TRAIN_FILE, TRAIN_ANNOTATION, BATCH_SIZE)
+    test_data_loader, label_test_data_loader = create_data_loader(TEST_FILE, TEST_ANNOTATION, BATCH_SIZE)
 
+    
     # construct model and assign it to device
     ###Select tunable parameters here
     ####################################################
@@ -106,6 +103,7 @@ if __name__ == "__main__":
     size_hidden_layer = (1/100) #Can be [(1/10),(1/20), (1/100)]
     ######################################################
     
+
     #Init instance of self-attention-layer
     SAi = SelfAttention(channel_factor**2, min(9,channel_factor**2),device).to(device) #Parameter is dim before attention-block
     SAi = SAi.float()
@@ -118,11 +116,7 @@ if __name__ == "__main__":
     #Initialise loss funtion + optimiser
     loss_fn = nn.BCELoss()
     #loss_fn = nn.MSELoss()
-    optimiser = tr.optim.Adam(MelCNNi.parameters(),
-                                 lr=LEARNING_RATE)
+    optimiser = tr.optim.Adam(MelCNNi.parameters(), lr=LEARNING_RATE)
 
     # train model
-    train(MelCNNi, train_data_loader, loss_fn, optimiser, device, EPOCHS, test_data_loader)
-
-    #Generate filename from tunable parameters
-    #fname = str(channel_factor) + "_" + str(pool_before_attention) + "_" + str(int(1/reduce_ch
+    train(MelCNNi, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, EPOCHS, test_data_loader, label_test_data_loader)
