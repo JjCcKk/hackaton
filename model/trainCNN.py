@@ -39,8 +39,6 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
         input = input.to(device)
         lable = lable.float().to(device)
 
-        print(lable)
-
         if len(lable)==BATCH_SIZE:
 
             #print("Shape of sample: " + str(input.size()))
