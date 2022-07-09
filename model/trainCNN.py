@@ -85,7 +85,7 @@ def train(model, train_data_loader, label_train_data_loader, loss_fn, optimiser,
         train_single_epoch(model, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, test_data_loader, test_label_loader)
         print("---------------------------")
     print("Finished training")
-    tr.save(model, DESTINATION_FILE + 'model.pth')
+    tr.save(model, 'model.pth')
 
 if __name__ == "__main__":
     if tr.cuda.is_available():

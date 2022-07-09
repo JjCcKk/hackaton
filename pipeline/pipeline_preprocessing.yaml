@@ -56,9 +56,8 @@ jobs:
     uses: script@v1
     with:
       script: |-
-        echo Lancement model
-        ls /inputs/repo/repo/model/
         python3 /inputs/repo/repo/model/trainCNN.py
+        cp /inputs/repo/repo/model/model.pth /outputs/result/
       image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
     inputs:
       data: Preprocessing.outputs.data

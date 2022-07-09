@@ -2,3 +2,4 @@ fastapi==0.78.0
 uvicorn==0.18.2
 gradio==3.0.24
 numba==0.53
+huggingface_hub
