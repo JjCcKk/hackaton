@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from compute_spectrograms import compute_spect
 
 app = FastAPI()
 
@@ -6,6 +7,6 @@ app = FastAPI()
 async def root():
     return {"message": "Hello World"}
 
-@app.get("/preprocess")
+@app.post("/preprocess")
 def preprocess():
     return {"Hello world"}

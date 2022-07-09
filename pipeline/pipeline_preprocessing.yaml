@@ -57,6 +57,7 @@ jobs:
     with:
       script: |-
         python3 /inputs/repo/repo/model/trainCNN.py
+        ls /inputs/repo/repo/model/
         cp /inputs/repo/repo/model/model.pth /outputs/result/
       image: paperspace/gradient-base:tf29-pt112-py39-2022-06-29
     inputs:

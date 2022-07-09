@@ -1,8 +1,4 @@
 import gradio as gr
-import numpy as np
-import librosa
-import librosa.display
-import scipy.io
 import requests
 import os
 
@@ -10,28 +6,26 @@ HF_TOKEN = os.getenv('HF_TOKEN')
 hf_writer = gr.HuggingFaceDatasetSaver(HF_TOKEN, "Rick-bot-flags")
 
 def greet(audio:tuple) -> str:
-    scipy.io.wavfile.write("my_song.wav", audio[0], np.array(audio[1]))
-    y, sr = librosa.load("my_song.wav", sr=audio[0])
-    mel_signal = librosa.feature.melspectrogram(y=y, sr=sr, hop_length=330, n_fft=32)
-    spectrogram = np.abs(mel_signal)
+    json_original = {
+        "Enregistrement": str(list(audio[0]))
+    }
 
-    res_preprocess = requests.get("https://j7zmal.deta.dev/preprocess")
+    res_preprocess = requests.post("https://j7zmal.deta.dev/preprocess", json=json_original)
     return res_preprocess.text
 
 
-audio = gr.inputs.Audio(source="microphone", label='Record a sound')
-
+audio = gr.inputs.Audio(source="microphone", label='What do you want to say ?')
 
 title = "Sarcasm detector"
 description = """
 <p>
-<center>
-
-<img src="https://huggingface.co/spaces/kingabzpro/Rick_and_Morty_Bot/resolve/main/img/rick.png" alt="rick" width="200"/>
-</center>
+    <center>
+        It is not always easy to know whether or not someone is being sarcastic. That's why we wanted to complete the existing NLP models with a sound analysis.
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlCS7X6KT6GDfkvjY5U2yi_mkqQnQbH25Eew&usqp=CAU" alt="rick" width="400"/>
+    </center>
 </p>
 """
-article = "Hello ma gueule"
+article = "<p style='text-align: center'><a href='https://github.com/JjCcKk/hackaton' target='_blank'>Visit the code !!</p>"
 
 
 iface = gr.Interface(fn=greet,
@@ -44,5 +38,4 @@ iface = gr.Interface(fn=greet,
 
 
 if __name__ == "__main__":
-    
     app, local_url, share_url = iface.launch()
