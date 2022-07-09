@@ -4,11 +4,11 @@ import numpy as np
 import torch.nn as nn
 from cnn import MelCNN
 from cnn import SelfAttention
-from configtrain import TRAIN_FILE, TEST_FILE, TRAIN_ANNOTATION, TEST_ANNOTATION
+from configtrain import TRAIN_FILE, TEST_FILE, TRAIN_ANNOTATION, TEST_ANNOTATION, DESTINATION_FILE
 import os
 import json
 
-BATCH_SIZE = 2
+BATCH_SIZE = 8
 EPOCHS = 50
 LEARNING_RATE = 0.00002
 
@@ -85,9 +85,9 @@ def train(model, train_data_loader, label_train_data_loader, loss_fn, optimiser,
         train_single_epoch(model, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, test_data_loader, test_label_loader)
         print("---------------------------")
     print("Finished training")
+    tr.save(model, DESTINATION_FILE + 'model.pth')
 
 if __name__ == "__main__":
-    print("COUCOUC")
     if tr.cuda.is_available():
         device = "cuda"
     else:

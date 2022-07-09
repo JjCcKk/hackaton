@@ -70,3 +70,7 @@ jobs:
     outputs:
       res:
         type: volume
+      result:
+        type: dataset
+        with:
+          ref: ds4r0a0xnoizszj
