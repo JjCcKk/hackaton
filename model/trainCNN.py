@@ -10,7 +10,7 @@ from cnn import MelCNN
 from cnn import SelfAttention
 from configtrain import TRAIN_FILE, TEST_FILE
 
-BATCH_SIZE = 4
+BATCH_SIZE = 2
 EPOCHS = 50
 LEARNING_RATE = 0.00002
 
@@ -37,6 +37,10 @@ def train_single_epoch(model, train_data_loader, loss_fn, optimiser, device, tes
         prediction = model(input)
         #print(prediction.size())
         prediction = tr.squeeze(prediction)
+        
+        #print(f"Lable: {lable}")
+        #print(f"Squeezed Prediction: {prediction}")
+        
         loss = loss_fn(prediction,lable)
 
         # backpropagate error and update weights
@@ -47,6 +51,8 @@ def train_single_epoch(model, train_data_loader, loss_fn, optimiser, device, tes
     print(f"loss: {loss.item()}")
     #Calculate loss on test set here!
     testLoss = []
+    
+    #Calculate loss on test-set
     for i,lable in test_data_loader:
         i = i.to(device)
         lable = lable.bool().int().float().to(device)
@@ -92,14 +98,24 @@ if __name__ == "__main__":
     test_data_loader = create_data_loader(usdTest, BATCH_SIZE)
 
     # construct model and assign it to device
-    SAi = SelfAttention(9,device).to(device) #Parameter is dim before attention-block
+    ###Select tunable parameters here
+    ####################################################
+    channel_factor = 2 #Can be [2,4,6]
+    pool_before_attention = True #[False, True]
+    reduce_channels_by = (1/4) #Can be [1/4, 1/2, 1]
+    size_hidden_layer = (1/100) #Can be [(1/10),(1/20), (1/100)]
+    ######################################################
+    
+    #Init instance of self-attention-layer
+    SAi = SelfAttention(channel_factor**2, min(9,channel_factor**2),device).to(device) #Parameter is dim before attention-block
     SAi = SAi.float()
-    MelCNNi = MelCNN(SAi).to(device)
+    #Init instance of model
+    MelCNNi = MelCNN(SAi, channel_factor, pool_before_attention, reduce_channels_by, size_hidden_layer).to(device)
     MelCNNi = MelCNNi.float()
 
     print(MelCNNi)
 
-    # initialise loss funtion + optimiser
+    #Initialise loss funtion + optimiser
     loss_fn = nn.BCELoss()
     #loss_fn = nn.MSELoss()
     optimiser = tr.optim.Adam(MelCNNi.parameters(),
@@ -108,6 +124,5 @@ if __name__ == "__main__":
     # train model
     train(MelCNNi, train_data_loader, loss_fn, optimiser, device, EPOCHS, test_data_loader)
 
-    # save model
-    tr.save(MelCNNi.state_dict(), "melCNN.pth")
-    print("Trained melCNN saved at melCNN.pth")
+    #Generate filename from tunable parameters
+    #fname = str(channel_factor) + "_" + str(pool_before_attention) + "_" + str(int(1/reduce_ch

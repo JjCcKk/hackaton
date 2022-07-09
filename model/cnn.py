@@ -11,24 +11,40 @@ import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 class MelCNN(nn.Module):
-    def __init__(self, selfAttentionBlockInstance, imgChannels=1, dimBeforeAttention=9):
+    def __init__(self, selfAttentionBlockInstance, channel_factor, pool_before_attention, reduce_channels_by, size_hidden_layer, imgChannels=1):
         super(MelCNN, self).__init__()
+        
+        #Calculate dimensions of model relative to parameters
+        self.channel_factor = channel_factor
+        self.pool_before_attention = pool_before_attention
+        self.reduce_channels_by = reduce_channels_by
+        if pool_before_attention:
+            height = 5
+            self.width_before_mlp = int(332*3*height)
+            self.FC1 = nn.Linear(self.width_before_mlp, int(size_hidden_layer*self.width_before_mlp))
+            self.FC2 = nn.Linear(int(size_hidden_layer*self.width_before_mlp),1)
+        else:
+            height = 14
+            self.width_before_mlp = int(667*3*height)
+            self.FC1 = nn.Linear(self.width_before_mlp, int(size_hidden_layer*self.width_before_mlp))
+            self.FC2 = nn.Linear(int(size_hidden_layer*self.width_before_mlp),1)
+            
+       
 
-        self.Conv1 = nn.Conv2d(imgChannels, 3, (5,5), padding=(2,2))
-        self.Conv2 = nn.Conv2d(3, dimBeforeAttention, (5,5), padding=(2,2))
+        #Initialize Layers
+        self.Conv1 = nn.Conv2d(imgChannels, channel_factor, (5,5), padding=(2,2))
+        self.Conv2 = nn.Conv2d(channel_factor, channel_factor**2, (5,5), padding=(2,2))
 
-        self.attentionBlock = selfAttentionBlockInstance
+        self.attentionBlock = selfAttentionBlockInstance #Has to be initialized with parameter=min(9,channel_factor**2)
 
-        self.Conv3 = nn.Conv2d(dimBeforeAttention, 3, (1,1))
+        self.Conv3 = nn.Conv2d(channel_factor**2, int((channel_factor**2)*reduce_channels_by), (1,1))
 
-        self.Conv4 = nn.Conv2d(3, 27, (5,5), padding=(2,2))
-        self.Conv5 = nn.Conv2d(27, 3, (5,5),padding=(2,2))
+        self.Conv4 = nn.Conv2d(int((channel_factor**2)*reduce_channels_by), int((channel_factor**2)*reduce_channels_by*9), (5,5), padding=(2,2))
+        self.Conv5 = nn.Conv2d(int((channel_factor**2)*reduce_channels_by*9), 3, (5,5),padding=(2,2))
 
         self.pool = nn.MaxPool2d(5, stride=2)
 
-        #self.FC1 = nn.Linear(3*32*1329, 100)
-        self.FC1 = nn.Linear(3*5*332,100)
-        self.FC2 = nn.Linear(100,1)
+        
 
 
     def forward(self, x):
@@ -41,20 +57,21 @@ class MelCNN(nn.Module):
         x = F.relu(self.Conv1(x))
         x = F.relu(self.Conv2(x))
         x = x + res1
-        x = self.pool(x) #Turn max pooling of if there is enough memory!!!!!
+        
+        if self.pool_before_attention:
+            x = self.pool(x) #Turn max pooling of if there is enough memory!!!!!
         
         #print('Shape after max-pooling: ' + str(x.size()))
         #print('Shape of feature-map before attention-block: ' + str(x.size()))
 
         x = self.attentionBlock.forward(x)
-        x = F.relu(x)
 
         #print('Shape after attention-block: ' + str(x.size()))
         #plt.figure()
         #plt.imshow(x.cpu().detach().numpy()[0,0,:,:])
         #plt.show()
 
-        x = self.Conv3(x) #Pointwise conv makes 3 channels from 9
+        x = F.relu(self.Conv3(x)) #Pointwise conv makes 3 channels from 9
         #print('Shape after attention-block and 1x1conv: ' + str(x.size()))
 
         #Residual Block
@@ -68,26 +85,21 @@ class MelCNN(nn.Module):
 
         #Flatten
         #x = x.view(-1,1,3*12*int((1329)/2))
-        x = x.view(-1,1,3*5*332)
+        x = x.view(-1,1,self.width_before_mlp)
         #MLP
-        x = F.relu(self.FC1(x))
+        x = F.leaky_relu(self.FC1(x))
         x = torch.sigmoid(self.FC2(x))
 
 
         return x
 
-    def _conv(self,n_in,n_out):
-        #return ConvLayer(n_in, n_out, ks=1, ndim=1, norm_type=nn.NormType.Spectral, act_cls=None, bias=False)
-        layer = nn.utils.spectral_norm(nn.Conv2d(n_in, n_out, kernel_size=(1,1), bias=False))
-        return layer
-
 
 class SelfAttention(nn.Module):
     "Self attention layer for `n_channels`."
-    def __init__(self, n_channels, device):
+    def __init__(self, n_channels, param, device):
         super(SelfAttention, self).__init__()
         self.device = device
-        self.query,self.key,self.value = [nn.utils.spectral_norm(self._conv(n_channels, c)) for c in (n_channels//9,n_channels//9,n_channels)]
+        self.query,self.key,self.value = [nn.utils.spectral_norm(self._conv(n_channels, c)) for c in (n_channels//param,n_channels//param,n_channels)]
         self.gamma = nn.Parameter(torch.tensor([0.]))
 
     def _conv(self,n_in,n_out):
