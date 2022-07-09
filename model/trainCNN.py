@@ -59,7 +59,7 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
         loss.backward()
         optimiser.step()
 
-    print(f"loss: {loss.item()}")
+    #print(f"loss: {loss.item()}")
     #Calculate loss on test set here!
     testLoss = []
     
@@ -73,7 +73,7 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
         prediction = tr.squeeze(prediction)
         loss = loss_fn(prediction,lable)
         testLoss.append(loss.item())
-    print(f"test_loss: {np.mean(testLoss)}")
+    #print(f"test_loss: {np.mean(testLoss)}")
 
 
 def train(model, train_data_loader, label_train_data_loader, loss_fn, optimiser, device, epochs, test_data_loader, test_label_loader):
