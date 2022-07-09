@@ -17,7 +17,7 @@ def create_data_loader(train_dir, annotation_file, batch_size):
     train_df, label_df = [],[]
     with open(annotation_file, 'r') as f:
         data = json.load(f)
-    print(data)
+
     for i in os.listdir(train_dir):
         vec = np.load(train_dir + i)
         label = data[i.replace(".npy", "")]
@@ -41,23 +41,25 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
 
         print(lable)
 
-        #print("Shape of sample: " + str(input.size()))
-        input = input.float()
+        if len(lable)==BATCH_SIZE:
 
-        # calculate loss
-        prediction = model(input)
-        #print(prediction.size())
-        prediction = tr.squeeze(prediction)
-        
-        #print(f"Lable: {lable}")
-        #print(f"Squeezed Prediction: {prediction}")
-        
-        loss = loss_fn(prediction,lable)
+            #print("Shape of sample: " + str(input.size()))
+            input = input.float()
 
-        # backpropagate error and update weights
-        optimiser.zero_grad()
-        loss.backward()
-        optimiser.step()
+            # calculate loss
+            prediction = model(input)
+            #print(prediction.size())
+            prediction = tr.squeeze(prediction)
+            
+            #print(f"Lable: {lable}")
+            #print(f"Squeezed Prediction: {prediction}")
+            
+            loss = loss_fn(prediction,lable)
+
+            # backpropagate error and update weights
+            optimiser.zero_grad()
+            loss.backward()
+            optimiser.step()
 
     print(f"loss: {loss.item()}")
     #Calculate loss on test set here!
@@ -65,14 +67,16 @@ def train_single_epoch(model, train_data_loader, train_label_data_loader, loss_f
     
     #Calculate loss on test-set
     for i,lable in zip(test_data_loader, test_label_data_loader):
-        i = i.to(device)
-        lable = lable.bool().int().float().to(device)
-        i = i.float()
-        # calculate loss
-        prediction = model(i)
-        prediction = tr.squeeze(prediction)
-        loss = loss_fn(prediction,lable)
-        testLoss.append(loss.item())
+
+        if len(lable)==BATCH_SIZE:
+            i = i.to(device)
+            lable = lable.bool().int().float().to(device)
+            i = i.float()
+            # calculate loss
+            prediction = model(i)
+            prediction = tr.squeeze(prediction)
+            loss = loss_fn(prediction,lable)
+            testLoss.append(loss.item())
     print(f"test_loss: {np.mean(testLoss)}")
 
 
@@ -110,8 +114,6 @@ if __name__ == "__main__":
     #Init instance of model
     MelCNNi = MelCNN(SAi, channel_factor, pool_before_attention, reduce_channels_by, size_hidden_layer).to(device)
     MelCNNi = MelCNNi.float()
-
-    print(MelCNNi)
 
     #Initialise loss funtion + optimiser
     loss_fn = nn.BCELoss()
