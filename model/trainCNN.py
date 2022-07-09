@@ -28,8 +28,8 @@ def create_data_loader(train_dir, annotation_file, batch_size):
     label_df = np.array(label_df)
     train_df = np.array(train_df)
 
-    train_dataloader = DataLoader(train_df, batch_size=batch_size)
-    label_dataloader = DataLoader(label_df, batch_size=batch_size)
+    train_dataloader = DataLoader(train_df, batch_size=batch_size, shuffle=False, drop_last=True)
+    label_dataloader = DataLoader(label_df, batch_size=batch_size, shuffle=False, drop_last=True)
 
     return train_dataloader, label_dataloader
 
