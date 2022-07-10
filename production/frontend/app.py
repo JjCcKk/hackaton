@@ -12,11 +12,15 @@ def greet(audio:tuple) -> str:
     }
 
     res_preprocess = requests.post("http://127.0.0.1:8000/preprocess", json=json_original)
-    print(ast.literal_eval(res_preprocess.text)["Spectrogram"])
+    res_texte = ast.literal_eval(requests.post("http://127.0.0.1:8000/gettext", json=json_original).text)
 
-    return "Hello"
+    return res_texte["Texte"], res_texte["Traduction"], "Sarcastic !!"
 
+text1 = gr.Textbox(type="str", label="Initial text")
+text2 = gr.Textbox(type="str", label="Translate text")
+text3 = gr.Textbox(type="str", label="Sarcasm ?")
 
+choix_langage = gr.inputs.Radio(["No traduction","Français", "Spanish"], label='In which langage would you like to translate ?')
 audio = gr.inputs.Audio(source="microphone", label='What do you want to say ?')
 
 title = "Sarcasm detector"
@@ -33,7 +37,7 @@ article = "<p style='text-align: center'><a href='https://github.com/JjCcKk/hack
 
 iface = gr.Interface(fn=greet,
                     inputs=[audio], 
-                    outputs=["text"],
+                    outputs=[text1, text2, text3],
                     title = title, 
                     flagging_callback = hf_writer, 
                     description = description, 
