@@ -14,11 +14,10 @@ def greet(langage, audio:tuple) -> str:
         "Langue": DICO_CORR[langage]
     }
 
-    res_preprocess = requests.post("http://127.0.0.1:8000/preprocess", json=json_original)
-    print(np.array(ast.literal_eval(res_preprocess.text)["Spectrogram"]).shape)
+    res_preprocess = requests.post("http://127.0.0.1:8000/prediction", json=json_original)
     res_texte = ast.literal_eval(requests.post("http://127.0.0.1:8000/gettext", json=json_original).text)
 
-    return res_texte["Texte"], res_texte["Traduction"], "Sarcastic !!"
+    return res_texte["Texte"], res_texte["Traduction"], ast.literal_eval(res_preprocess.text)["Prediction"]
 
 text1 = gr.Textbox(type="str", label="Initial text")
 text2 = gr.Textbox(type="str", label="Translate text")

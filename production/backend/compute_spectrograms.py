@@ -1,16 +1,13 @@
-import numpy as np
-import librosa
+from predict import getPrediction
 import speech_recognition as sr
 import soundfile as sf
 import translators as ts
 
-def compute_spect(audio):
+def compute_pred(audio):
     sf.write('my_song.wav', audio, 48000, subtype='PCM_16')
-    y, sr = librosa.load("my_song.wav", sr=48000)
-    mel_signal = librosa.feature.melspectrogram(y=y, sr=sr, hop_length=330, n_fft=32)
-    spectrogram = np.abs(mel_signal)
-    
-    return spectrogram
+    if getPrediction("my_song.wav").tolist()[0][0][0] > 0.5:
+        return "Sarcastic"
+    return "Non Sarcastic"
 
 def get_the_text(audio):
     sf.write('my_song.wav', audio, 48000, subtype='PCM_16')

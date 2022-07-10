@@ -1,7 +1,8 @@
 fastapi
 requests
-librosa
 scipy.io
 SpeechRecognition 
 pydub
 translators
+torch
+torchaudio

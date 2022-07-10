@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-from httpx import get
-from compute_spectrograms import compute_spect, get_the_text, get_traduction
+from compute_spectrograms import get_the_text, get_traduction, compute_pred
 import numpy as np
 
 app = FastAPI()
@@ -9,10 +8,10 @@ app = FastAPI()
 async def root():
     return {"message": "Hello World"}
 
-@app.post("/preprocess")
+
+@app.post("/prediction")
 def preprocess(input_user:dict):
-    spec = compute_spect(np.array(input_user["Enregistrement"], dtype='int32')).tolist()
-    return {"Spectrogram":spec}
+    return {"Prediction":compute_pred(np.array(input_user["Enregistrement"], dtype='int32'))}
 
 @app.post("/gettext")
 def get_text(input_user:dict):
