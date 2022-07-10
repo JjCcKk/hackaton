@@ -23,5 +23,5 @@ def get_the_text(audio):
     return text
 
 
-def get_traduction(texte):
-    return ts.google(texte, to_language='fr')
+def get_traduction(texte, langage):
+    return ts.google(texte, to_language=langage)
